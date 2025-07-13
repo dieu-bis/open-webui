@@ -594,6 +594,29 @@ def load_oauth_providers():
             "sub_claim": "id",
         }
 
+    if ATLASSIAN_CLIENT_ID.value and ATLASSIAN_CLIENT_SECRET.value:
+
+        def atlassian_oauth_register(client):
+            client.register(
+                name="atlassian",
+                client_id=ATLASSIAN_CLIENT_ID.value,
+                client_secret=ATLASSIAN_CLIENT_SECRET.value,
+                access_token_url="https://auth.atlassian.com/oauth/token",
+                authorize_url="https://auth.atlassian.com/authorize",
+                api_base_url="https://api.atlassian.com",
+                client_kwargs={
+                    "scope": ATLASSIAN_OAUTH_SCOPE.value,
+                    "audience": "api.atlassian.com",
+                    "prompt": "consent",
+                },
+                redirect_uri=ATLASSIAN_REDIRECT_URI.value,
+            )
+
+        OAUTH_PROVIDERS["atlassian"] = {
+            "redirect_uri": ATLASSIAN_REDIRECT_URI.value,
+            "register": atlassian_oauth_register,
+        }
+
     if (
         OAUTH_CLIENT_ID.value
         and OAUTH_CLIENT_SECRET.value
@@ -630,9 +653,6 @@ def load_oauth_providers():
             "redirect_uri": OPENID_REDIRECT_URI.value,
             "register": oidc_oauth_register,
         }
-
-
-load_oauth_providers()
 
 ####################################
 # Static DIR
@@ -793,6 +813,43 @@ SCIM_TOKEN = PersistentConfig(
     "scim.token",
     os.environ.get("SCIM_TOKEN", ""),
 )
+
+####################################
+# Atlassian OAuth Configuration
+####################################
+
+ENABLE_ATLASSIAN_INTEGRATION = PersistentConfig(
+    "ENABLE_ATLASSIAN_INTEGRATION",
+    "atlassian.enable",
+    os.environ.get("ENABLE_ATLASSIAN_INTEGRATION", "False").lower() == "true",
+)
+
+ATLASSIAN_CLIENT_ID = PersistentConfig(
+    "ATLASSIAN_CLIENT_ID",
+    "atlassian.client_id",
+    os.environ.get("ATLASSIAN_CLIENT_ID", ""),
+)
+
+ATLASSIAN_CLIENT_SECRET = PersistentConfig(
+    "ATLASSIAN_CLIENT_SECRET",
+    "atlassian.client_secret",
+    os.environ.get("ATLASSIAN_CLIENT_SECRET", ""),
+)
+
+ATLASSIAN_OAUTH_SCOPE = PersistentConfig(
+    "ATLASSIAN_OAUTH_SCOPE",
+    "atlassian.oauth_scope",
+    os.environ.get("ATLASSIAN_OAUTH_SCOPE", "read:me read:jira-user read:jira-work read:confluence-content.all read:space:confluence offline_access"),
+)
+
+ATLASSIAN_REDIRECT_URI = PersistentConfig(
+    "ATLASSIAN_REDIRECT_URI",
+    "atlassian.redirect_uri",
+    os.environ.get("ATLASSIAN_REDIRECT_URI", ""),
+)
+
+# Load OAuth providers after all config variables are defined
+load_oauth_providers()
 
 ####################################
 # OLLAMA_BASE_URL

@@ -86,6 +86,7 @@ from open_webui.routers import (
     users,
     utils,
     scim,
+    atlassian,
 )
 
 from open_webui.routers.retrieval import (
@@ -100,6 +101,7 @@ from open_webui.models.functions import Functions
 from open_webui.models.models import Models
 from open_webui.models.users import UserModel, Users
 from open_webui.models.chats import Chats
+from open_webui.models.atlassian_connections import AtlassianConnection
 
 from open_webui.config import (
     LICENSE_KEY,
@@ -120,6 +122,12 @@ from open_webui.config import (
     # SCIM
     SCIM_ENABLED,
     SCIM_TOKEN,
+    # Atlassian
+    ENABLE_ATLASSIAN_INTEGRATION,
+    ATLASSIAN_CLIENT_ID,
+    ATLASSIAN_CLIENT_SECRET,
+    ATLASSIAN_OAUTH_SCOPE,
+    ATLASSIAN_REDIRECT_URI,
     # Thread pool size for FastAPI/AnyIO
     THREAD_POOL_SIZE,
     # Tool Server Configs
@@ -627,6 +635,18 @@ app.state.config.ENABLE_DIRECT_CONNECTIONS = ENABLE_DIRECT_CONNECTIONS
 
 app.state.config.SCIM_ENABLED = SCIM_ENABLED
 app.state.config.SCIM_TOKEN = SCIM_TOKEN
+
+########################################
+#
+# Atlassian
+#
+########################################
+
+app.state.config.ENABLE_ATLASSIAN_INTEGRATION = ENABLE_ATLASSIAN_INTEGRATION
+app.state.config.ATLASSIAN_CLIENT_ID = ATLASSIAN_CLIENT_ID
+app.state.config.ATLASSIAN_CLIENT_SECRET = ATLASSIAN_CLIENT_SECRET
+app.state.config.ATLASSIAN_OAUTH_SCOPE = ATLASSIAN_OAUTH_SCOPE
+app.state.config.ATLASSIAN_REDIRECT_URI = ATLASSIAN_REDIRECT_URI
 
 ########################################
 #
@@ -1182,6 +1202,9 @@ app.include_router(utils.router, prefix="/api/v1/utils", tags=["utils"])
 # SCIM 2.0 API for identity management
 app.include_router(scim.router, prefix="/api/v1/scim/v2", tags=["scim"])
 
+# Atlassian integration API
+app.include_router(atlassian.router, prefix="/api/v1/atlassian", tags=["atlassian"])
+
 
 try:
     audit_level = AuditLevel(AUDIT_LOG_LEVEL)
@@ -1554,6 +1577,7 @@ async def get_app_config(request: Request):
                     "enable_admin_chat_access": ENABLE_ADMIN_CHAT_ACCESS,
                     "enable_google_drive_integration": app.state.config.ENABLE_GOOGLE_DRIVE_INTEGRATION,
                     "enable_onedrive_integration": app.state.config.ENABLE_ONEDRIVE_INTEGRATION,
+                    "enable_atlassian_integration": app.state.config.ENABLE_ATLASSIAN_INTEGRATION,
                 }
                 if user is not None
                 else {}
@@ -1594,6 +1618,11 @@ async def get_app_config(request: Request):
                     "client_id": ONEDRIVE_CLIENT_ID.value,
                     "sharepoint_url": ONEDRIVE_SHAREPOINT_URL.value,
                     "sharepoint_tenant_id": ONEDRIVE_SHAREPOINT_TENANT_ID.value,
+                },
+                "atlassian": {
+                    "client_id": ATLASSIAN_CLIENT_ID.value,
+                    "redirect_uri": ATLASSIAN_REDIRECT_URI.value,
+                    "oauth_scope": ATLASSIAN_OAUTH_SCOPE.value,
                 },
                 "ui": {
                     "pending_user_overlay_title": app.state.config.PENDING_USER_OVERLAY_TITLE,

@@ -31,6 +31,7 @@
 
 	export let uploadGoogleDriveHandler: Function;
 	export let uploadOneDriveHandler: Function;
+	export let uploadAtlassianHandler: Function;
 
 	export let onClose: Function;
 
@@ -262,6 +263,20 @@
 							/>
 						</svg>
 						<div class="line-clamp-1">{$i18n.t('Google Drive')}</div>
+					</DropdownMenu.Item>
+				{/if}
+
+				{#if $config?.features?.enable_atlassian_integration}
+					<DropdownMenu.Item
+						class="flex gap-2 items-center px-3 py-2 text-sm font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl"
+						on:click={() => {
+							uploadAtlassianHandler();
+						}}
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5">
+							<path fill="#0052CC" d="M7.986 11.407c-.138-.238-.443-.241-.577-.007l-4.157 7.22a.288.288 0 00.248.441h3.685c.127 0 .241-.08.284-.199l1.731-4.958c.078-.225-.037-.475-.215-.652l-.999-1.845zm3.88-6.469c-.125-.22-.39-.235-.524-.024-1.366 2.137-1.837 4.373-1.497 6.557.38 2.443 1.85 4.66 4.376 6.571a.287.287 0 00.444-.148l1.07-3.818c.047-.168-.016-.35-.153-.443l-6.1-4.137a.289.289 0 01-.115-.34l2.503-4.137c.126-.207-.002-.476-.238-.476h-1.998a.293.293 0 00-.248.138l-1.779 3.118c-.112.197.008.445.234.445h1.59c.287 0 .478.304.343.548l-1.908 3.452z"/>
+						</svg>
+						<div class="line-clamp-1">{$i18n.t('Atlassian')}</div>
 					</DropdownMenu.Item>
 				{/if}
 

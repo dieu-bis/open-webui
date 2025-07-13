@@ -42,6 +42,7 @@
 	import FilesOverlay from './MessageInput/FilesOverlay.svelte';
 	import Commands from './MessageInput/Commands.svelte';
 	import ToolServersModal from './ToolServersModal.svelte';
+	import AtlassianPicker from './MessageInput/AtlassianPicker.svelte';
 
 	import RichTextInput from '../common/RichTextInput.svelte';
 	import Tooltip from '../common/Tooltip.svelte';
@@ -108,6 +109,7 @@
 	});
 
 	let showTools = false;
+	let showAtlassianPicker = false;
 
 	let loaded = false;
 	let recording = false;
@@ -496,6 +498,25 @@
 
 <FilesOverlay show={dragged} />
 <ToolServersModal bind:show={showTools} {selectedToolIds} />
+<AtlassianPicker 
+	bind:show={showAtlassianPicker} 
+	onSelect={async (data) => {
+		// Instead of uploading as a file, add content directly to the prompt
+		const atlassianContent = `\n\n---\n**Source: ${data.metadata.siteName} - ${data.metadata.type === 'atlassian_jira' ? 'Jira' : 'Confluence'}**\n[View in Atlassian](${data.metadata.url})\n\n${data.content}\n---\n\n`;
+		
+		// Append the content to the current prompt
+		prompt = prompt + atlassianContent;
+		
+		// Optionally, you could also add it as a "virtual" file for display purposes
+		// files = [...files, {
+		// 	type: 'text',
+		// 	name: data.metadata.title,
+		// 	content: data.content,
+		// 	metadata: data.metadata,
+		// 	virtual: true
+		// }];
+	}} 
+/>
 
 {#if loaded}
 	<div class="w-full font-primary">
@@ -1242,6 +1263,9 @@
 												} catch (error) {
 													console.error('OneDrive Error:', error);
 												}
+											}}
+											uploadAtlassianHandler={() => {
+												showAtlassianPicker = true;
 											}}
 											onClose={async () => {
 												await tick();
